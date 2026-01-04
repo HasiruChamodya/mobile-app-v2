@@ -29,6 +29,7 @@ fun SettingsScreen(
     onSettingsChanged: (EmergencySettings) -> Unit,
     onTestAlert: () -> Unit,
     onNavigateBack: () -> Unit,
+    isTestAlertLoading: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -140,12 +141,22 @@ fun SettingsScreen(
             
             Button(
                 onClick = onTestAlert,
+                enabled = !isTestAlertLoading,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.secondary
                 )
             ) {
-                Text("Send Test Alert")
+                if (isTestAlertLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Sending Test Alert...")
+                } else {
+                    Text("Send Test Alert")
+                }
             }
             
             Text(
