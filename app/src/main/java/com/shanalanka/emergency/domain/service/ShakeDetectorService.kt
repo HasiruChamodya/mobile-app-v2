@@ -25,7 +25,7 @@ import kotlin.math.sqrt
 
 /**
  * Foreground service that detects phone shaking to trigger emergency alerts.
- * Uses accelerometer sensor to detect shake pattern.
+ * Uses improved shake detection algorithm based on acceleration patterns.
  */
 @AndroidEntryPoint
 class ShakeDetectorService : Service(), SensorEventListener {
@@ -39,24 +39,27 @@ class ShakeDetectorService : Service(), SensorEventListener {
     
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     
-    private var shakeCount = 0
-    private var lastShakeTime = 0L
+    // Shake detection state
+    private var shakeTimestamps = mutableListOf<Long>()
     private var lastUpdateTime = 0L
-    private var lastX = 0f
-    private var lastY = 0f
-    private var lastZ = 0f
-    private var shakeThreshold = 2.7f // Dynamic threshold based on sensitivity
+    
+    // Thresholds based on sensitivity
+    private var accelerationThreshold = 15f // m/s^2
+    private var shakeWindowMs = 1500L // Time window to detect shake pattern
+    private var requiredShakeEvents = 3 // Minimum shake movements to trigger
     
     companion object {
         private const val TAG = "ShakeDetectorService"
         private const val NOTIFICATION_ID = 1001
         private const val CHANNEL_ID = "shake_detection_channel"
-        private const val SHAKE_THRESHOLD_LOW = 3.5f // Less sensitive
-        private const val SHAKE_THRESHOLD_MEDIUM = 2.7f // Balanced
-        private const val SHAKE_THRESHOLD_HIGH = 2.0f // More sensitive
-        private const val SHAKE_SLOP_TIME_MS = 500 // Time between shakes
-        private const val SHAKE_COUNT_RESET_TIME_MS = 2000 // Reset after 2 seconds
-        private const val REQUIRED_SHAKE_COUNT = 3
+        
+        // Sensitivity thresholds (m/s^2)
+        private const val ACCELERATION_THRESHOLD_LOW = 20f // Strong shaking required
+        private const val ACCELERATION_THRESHOLD_MEDIUM = 15f // Moderate shaking
+        private const val ACCELERATION_THRESHOLD_HIGH = 12f // Gentle shaking
+        
+        private const val GRAVITY = 9.81f // Gravity constant
+        private const val UPDATE_INTERVAL_MS = 100L
         
         fun start(context: Context) {
             val intent = Intent(context, ShakeDetectorService::class.java)
@@ -75,10 +78,11 @@ class ShakeDetectorService : Service(), SensorEventListener {
         // Load sensitivity setting
         val prefs = getSharedPreferences(PreferenceKeys.PREFS_NAME, Context.MODE_PRIVATE)
         val sensitivityName = prefs.getString(PreferenceKeys.KEY_SHAKE_SENSITIVITY, "MEDIUM") ?: "MEDIUM"
-        shakeThreshold = when (sensitivityName) {
-            "LOW" -> SHAKE_THRESHOLD_LOW
-            "HIGH" -> SHAKE_THRESHOLD_HIGH
-            else -> SHAKE_THRESHOLD_MEDIUM
+        
+        accelerationThreshold = when (sensitivityName) {
+            "LOW" -> ACCELERATION_THRESHOLD_LOW
+            "HIGH" -> ACCELERATION_THRESHOLD_HIGH
+            else -> ACCELERATION_THRESHOLD_MEDIUM
         }
         
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -94,19 +98,17 @@ class ShakeDetectorService : Service(), SensorEventListener {
         
         createNotificationChannel()
         
-        // Try to start as foreground service (may fail on some Android versions)
+        // Try to start as foreground service
         try {
             startForeground(NOTIFICATION_ID, createNotification())
         } catch (e: SecurityException) {
-            // If foreground service fails due to missing permissions, log but continue
             android.util.Log.w(TAG, "Could not start as foreground service due to SecurityException", e)
         } catch (e: Exception) {
-            // Catch other potential exceptions (e.g., ForegroundServiceStartNotAllowedException on Android 12+)
             android.util.Log.w(TAG, "Could not start as foreground service", e)
         }
         
-        // Register sensor listener
-        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI)
+        // Register sensor listener with faster update rate for better detection
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME)
     }
     
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -125,45 +127,46 @@ class ShakeDetectorService : Service(), SensorEventListener {
         
         val currentTime = System.currentTimeMillis()
         
-        if ((currentTime - lastUpdateTime) > 100) {
-            val diffTime = currentTime - lastUpdateTime
-            lastUpdateTime = currentTime
-            
-            val x = event.values[0]
-            val y = event.values[1]
-            val z = event.values[2]
-            
-            val gX = (x - lastX) / diffTime * 10000
-            val gY = (y - lastY) / diffTime * 10000
-            val gZ = (z - lastZ) / diffTime * 10000
-            
-            val gForce = sqrt(gX * gX + gY * gY + gZ * gZ)
-            
-            if (gForce > shakeThreshold) {
-                if (currentTime - lastShakeTime > SHAKE_SLOP_TIME_MS) {
-                    shakeCount++
-                    lastShakeTime = currentTime
-                    
-                    // Provide haptic feedback
-                    if (vibrator.hasVibrator()) {
-                        vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
-                    }
-                    
-                    if (shakeCount >= REQUIRED_SHAKE_COUNT) {
-                        onShakeDetected()
-                        shakeCount = 0
-                    }
+        // Throttle updates
+        if ((currentTime - lastUpdateTime) < UPDATE_INTERVAL_MS) {
+            return
+        }
+        
+        lastUpdateTime = currentTime
+        
+        // Get acceleration values
+        val x = event.values[0]
+        val y = event.values[1]
+        val z = event.values[2]
+        
+        // Calculate acceleration magnitude (remove gravity)
+        // Note: This is a simplified approach. For production, consider using a low-pass filter
+        val accelerationMagnitude = sqrt(x * x + y * y + z * z) - GRAVITY
+        
+        // Detect significant acceleration (shake movement)
+        if (accelerationMagnitude > accelerationThreshold) {
+            synchronized(shakeTimestamps) {
+                shakeTimestamps.add(currentTime)
+                
+                // Provide subtle haptic feedback for each detected shake movement
+                if (vibrator.hasVibrator()) {
+                    vibrator.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE))
+                }
+                
+                // Clean up old timestamps outside the detection window
+                shakeTimestamps.removeAll { it < currentTime - shakeWindowMs }
+                
+                // Check if we have enough shake events in the time window
+                if (shakeTimestamps.size >= requiredShakeEvents) {
+                    onShakeDetected()
+                    shakeTimestamps.clear()
                 }
             }
-            
-            // Reset shake count if too much time has passed
-            if (currentTime - lastShakeTime > SHAKE_COUNT_RESET_TIME_MS) {
-                shakeCount = 0
+        } else {
+            // Clean up old timestamps
+            synchronized(shakeTimestamps) {
+                shakeTimestamps.removeAll { it < currentTime - shakeWindowMs }
             }
-            
-            lastX = x
-            lastY = y
-            lastZ = z
         }
     }
     
@@ -172,9 +175,16 @@ class ShakeDetectorService : Service(), SensorEventListener {
     }
     
     private fun onShakeDetected() {
-        // Stronger vibration for confirmation
+        android.util.Log.d(TAG, "Shake pattern detected! Triggering emergency alert.")
+        
+        // Strong vibration pattern for confirmation
         if (vibrator.hasVibrator()) {
-            vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 100, 100, 100), -1))
+            vibrator.vibrate(
+                VibrationEffect.createWaveform(
+                    longArrayOf(0, 100, 50, 100, 50, 100), // On-off pattern
+                    -1 // Don't repeat
+                )
+            )
         }
         
         // Trigger emergency alert
@@ -185,7 +195,7 @@ class ShakeDetectorService : Service(), SensorEventListener {
     
     private fun createNotification() = NotificationCompat.Builder(this, CHANNEL_ID)
         .setContentTitle("Shake Detection Active")
-        .setContentText("Shake your phone 3 times to send emergency alert")
+        .setContentText("Shake phone vigorously to send emergency alert")
         .setSmallIcon(R.drawable.ic_launcher_foreground)
         .setPriority(NotificationCompat.PRIORITY_LOW)
         .setOngoing(true)

@@ -1,6 +1,8 @@
 package com.shanalanka.emergency.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
@@ -63,6 +65,7 @@ fun SettingsScreen(
             modifier = modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -144,7 +147,7 @@ fun SettingsScreen(
             // Shake Detection
             SettingSwitch(
                 title = "Shake Detection",
-                description = "Trigger alert by shaking phone 3 times",
+                description = "Shake phone vigorously for 1-2 seconds to trigger alert",
                 checked = settings.shakeDetectionEnabled,
                 onCheckedChange = { checked ->
                     onSettingsChanged(settings.copy(shakeDetectionEnabled = checked))
@@ -259,8 +262,6 @@ fun SettingsScreen(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            
-            Spacer(modifier = Modifier.weight(1f))
             
             Divider()
             
