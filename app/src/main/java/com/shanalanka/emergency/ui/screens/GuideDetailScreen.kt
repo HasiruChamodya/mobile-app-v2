@@ -1,5 +1,6 @@
 package com.shanalanka.emergency.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,16 +13,22 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.shanalanka.emergency.data.model.EmergencyGuide
 import com.shanalanka.emergency.data.model.GuideCategory
 import com.shanalanka.emergency.data.model.GuideStep
 import com.shanalanka.emergency.ui.components.GuideStepCard
 import com.shanalanka.emergency.ui.theme.SahanaLankaTheme
+import com.shanalanka.emergency.ui.theme.TopBarGradient
 import com.shanalanka.emergency.ui.viewmodel.EmergencyGuidesViewModel
 import kotlinx.coroutines.launch
 
@@ -72,14 +79,41 @@ private fun GuideDetailContent(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(guide.title) },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shadowElevation = 8.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(brush = TopBarGradient)
+                        .padding(horizontal = 8.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        }
+                        Text(
+                            text = guide.title,
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 20.sp,
+                                shadow = Shadow(
+                                    color = Color.Black.copy(alpha = 0.3f),
+                                    offset = Offset(0f, 2f),
+                                    blurRadius = 4f
+                                )
+                            ),
+                            color = Color.White,
+                            maxLines = 1,
+                            modifier = Modifier.weight(1f)
+                        )
                     }
-                },
-                actions = {
                     IconButton(onClick = onBookmarkClick) {
                         Icon(
                             imageVector = if (guide.isBookmarked) {
@@ -91,17 +125,12 @@ private fun GuideDetailContent(
                                 "Remove bookmark"
                             } else {
                                 "Add bookmark"
-                            }
+                            },
+                            tint = Color.White
                         )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            )
+                }
+            }
         }
     ) { paddingValues ->
         LazyColumn(

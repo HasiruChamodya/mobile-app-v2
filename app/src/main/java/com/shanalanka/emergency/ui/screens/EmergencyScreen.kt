@@ -1,5 +1,6 @@
 package com.shanalanka.emergency.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Contacts
@@ -9,12 +10,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -22,6 +28,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.shanalanka.emergency.ui.components.EmergencyButton
 import com.shanalanka.emergency.ui.theme.SahanaLankaTheme
+import com.shanalanka.emergency.ui.theme.TopBarGradient
 import com.shanalanka.emergency.ui.viewmodel.EmergencyState
 import com.shanalanka.emergency.ui.viewmodel.EmergencyViewModel
 import com.shanalanka.emergency.util.LocationFormatter
@@ -90,19 +97,42 @@ private fun EmergencyScreenContent(
     
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "SahanaLanka Emergency",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            )
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shadowElevation = 8.dp
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(brush = TopBarGradient)
+                        .padding(horizontal = 16.dp, vertical = 16.dp)
+                ) {
+                    Column {
+                        Text(
+                            text = "Sahana Lanka",
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 28.sp,
+                                shadow = Shadow(
+                                    color = Color.Black.copy(alpha = 0.3f),
+                                    offset = Offset(0f, 2f),
+                                    blurRadius = 4f
+                                )
+                            ),
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Stay Safe",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = Color.White.copy(alpha = 0.9f)
+                        )
+                    }
+                }
+            }
         }
     ) { paddingValues ->
         Box(
