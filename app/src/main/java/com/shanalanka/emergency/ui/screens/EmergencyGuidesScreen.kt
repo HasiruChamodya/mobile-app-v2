@@ -97,7 +97,7 @@ fun EmergencyGuidesScreen(
                 onCategorySelected = { viewModel.selectCategory(it) }
             )
             
-            Divider()
+            HorizontalDivider()
             
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -128,7 +128,7 @@ fun EmergencyGuidesScreen(
                     
                     item {
                         Spacer(modifier = Modifier.height(8.dp))
-                        Divider()
+                        HorizontalDivider()
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                     

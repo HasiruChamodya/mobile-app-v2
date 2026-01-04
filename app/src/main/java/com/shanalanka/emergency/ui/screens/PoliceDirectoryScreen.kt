@@ -100,7 +100,7 @@ fun PoliceDirectoryScreen(
                 onDistrictSelected = { viewModel.selectDistrict(it) }
             )
             
-            Divider()
+            HorizontalDivider()
             
             // Police stations list
             if (policeStations.isEmpty()) {

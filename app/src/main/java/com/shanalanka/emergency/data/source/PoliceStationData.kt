@@ -6,8 +6,18 @@ import com.shanalanka.emergency.data.local.entity.PoliceStationEntity
  * Pre-populated police station data for all 25 districts of Sri Lanka.
  * This data is used to pre-populate the database on first app launch.
  * 
- * Note: Phone numbers are sample/placeholder numbers. 
- * Developers should update with official police hotline numbers.
+ * ⚠️ CRITICAL WARNING: Phone numbers are PLACEHOLDER/SAMPLE numbers! ⚠️
+ * 
+ * TODO: BEFORE PRODUCTION DEPLOYMENT, ALL phone numbers MUST be updated with:
+ *  - Official Sri Lanka Police emergency hotlines
+ *  - Verified police station contact numbers
+ *  - District police headquarters numbers
+ * 
+ * Contact Sri Lanka Police Department to obtain accurate emergency contact numbers.
+ * Using incorrect numbers in an emergency app could be life-threatening!
+ * 
+ * Official Sri Lanka Police website: https://www.police.lk
+ * Emergency hotline (general): 119
  */
 object PoliceStationData {
     
