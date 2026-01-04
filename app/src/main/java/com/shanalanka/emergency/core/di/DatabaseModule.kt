@@ -3,6 +3,7 @@ package com.shanalanka.emergency.core.di
 import android.content.Context
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.shanalanka.emergency.data.local.AppDatabase
 import com.shanalanka.emergency.data.local.ContactDao
@@ -27,6 +28,14 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class) // This makes the "pipes" available to the whole app
 object DatabaseModule {
 
+    // Migration from version 2 to 3: Remove default pre-populated contacts
+    private val MIGRATION_2_3 = object : Migration(2, 3) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            // Remove default contacts that were previously pre-populated (119, 1990)
+            database.execSQL("DELETE FROM emergency_contacts WHERE phoneNumber IN ('119', '1990')")
+        }
+    }
+
     @Provides
     @Singleton // Only one database instance is ever created (saves battery/RAM)
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
@@ -35,6 +44,7 @@ object DatabaseModule {
             AppDatabase::class.java,
             "sahana_lanka_db"
         )
+            .addMigrations(MIGRATION_2_3)
             .fallbackToDestructiveMigration() // Useful for students if you change the table later
             .addCallback(object : RoomDatabase.Callback() {
                 override fun onCreate(db: SupportSQLiteDatabase) {

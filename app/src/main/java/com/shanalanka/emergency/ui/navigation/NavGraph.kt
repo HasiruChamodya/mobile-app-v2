@@ -46,9 +46,6 @@ fun NavGraph(
             EmergencyScreen(
                 onNavigateToContacts = {
                     navController.navigate(Screen.Contacts.route)
-                },
-                onNavigateToSettings = {
-                    navController.navigate(Screen.Settings.route)
                 }
             )
         }

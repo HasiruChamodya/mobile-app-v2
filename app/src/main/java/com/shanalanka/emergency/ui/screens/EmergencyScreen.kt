@@ -36,7 +36,6 @@ import kotlinx.coroutines.delay
 fun EmergencyScreen(
     viewModel: EmergencyViewModel = hiltViewModel(),
     onNavigateToContacts: () -> Unit,
-    onNavigateToSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val emergencyState by viewModel.emergencyState.collectAsStateWithLifecycle()
@@ -65,7 +64,6 @@ fun EmergencyScreen(
         batteryThreshold = settings.batteryThreshold,
         onEmergencyTriggered = { viewModel.triggerEmergencyAlert() },
         onNavigateToContacts = onNavigateToContacts,
-        onNavigateToSettings = onNavigateToSettings,
         onResetState = { viewModel.resetState() },
         modifier = modifier
     )
@@ -85,7 +83,6 @@ private fun EmergencyScreenContent(
     batteryThreshold: Int,
     onEmergencyTriggered: () -> Unit,
     onNavigateToContacts: () -> Unit,
-    onNavigateToSettings: () -> Unit,
     onResetState: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -99,14 +96,6 @@ private fun EmergencyScreenContent(
                         text = "SahanaLanka Emergency",
                         style = MaterialTheme.typography.titleLarge
                     )
-                },
-                actions = {
-                    IconButton(onClick = onNavigateToSettings) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings"
-                        )
-                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -485,7 +474,6 @@ fun EmergencyScreenPreview() {
             batteryThreshold = 15,
             onEmergencyTriggered = { },
             onNavigateToContacts = { },
-            onNavigateToSettings = { },
             onResetState = { }
         )
     }
@@ -504,7 +492,6 @@ fun EmergencyScreenNoContactsPreview() {
             batteryThreshold = 15,
             onEmergencyTriggered = { },
             onNavigateToContacts = { },
-            onNavigateToSettings = { },
             onResetState = { }
         )
     }
@@ -523,7 +510,6 @@ fun EmergencyScreenDarkPreview() {
             batteryThreshold = 20,
             onEmergencyTriggered = { },
             onNavigateToContacts = { },
-            onNavigateToSettings = { },
             onResetState = { }
         )
     }
