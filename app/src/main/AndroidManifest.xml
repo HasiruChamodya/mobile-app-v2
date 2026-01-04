@@ -7,9 +7,12 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
     
+    <!-- Shake Detection Permissions -->
+    <uses-permission android:name="android.permission.BODY_SENSORS" />
+    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
+    
     <!-- New permissions for shake detection and battery monitoring -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -40,8 +43,7 @@
         <service
             android:name=".domain.service.ShakeDetectorService"
             android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="health" />
+            android:exported="false" />
         
         <!-- Battery Monitor Receiver -->
         <receiver

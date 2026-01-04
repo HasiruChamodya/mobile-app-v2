@@ -48,6 +48,7 @@ class ShakeDetectorService : Service(), SensorEventListener {
     private var shakeThreshold = 2.7f // Dynamic threshold based on sensitivity
     
     companion object {
+        private const val TAG = "ShakeDetectorService"
         private const val NOTIFICATION_ID = 1001
         private const val CHANNEL_ID = "shake_detection_channel"
         private const val SHAKE_THRESHOLD_LOW = 3.5f // Less sensitive
@@ -84,12 +85,28 @@ class ShakeDetectorService : Service(), SensorEventListener {
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         
-        createNotificationChannel()
-        startForeground(NOTIFICATION_ID, createNotification())
-        
-        accelerometer?.let {
-            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
+        // Check if accelerometer is available
+        if (accelerometer == null) {
+            android.util.Log.e(TAG, "Accelerometer not available on this device")
+            stopSelf()
+            return
         }
+        
+        createNotificationChannel()
+        
+        // Try to start as foreground service (may fail on some Android versions)
+        try {
+            startForeground(NOTIFICATION_ID, createNotification())
+        } catch (e: SecurityException) {
+            // If foreground service fails due to missing permissions, log but continue
+            android.util.Log.w(TAG, "Could not start as foreground service due to SecurityException", e)
+        } catch (e: Exception) {
+            // Catch other potential exceptions (e.g., ForegroundServiceStartNotAllowedException on Android 12+)
+            android.util.Log.w(TAG, "Could not start as foreground service", e)
+        }
+        
+        // Register sensor listener
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI)
     }
     
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
