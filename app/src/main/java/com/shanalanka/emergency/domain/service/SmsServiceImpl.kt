@@ -27,7 +27,8 @@ class SmsServiceImpl @Inject constructor(
     override suspend fun sendEmergencyAlert(
         contacts: List<EmergencyContact>,
         latitude: Double,
-        longitude: Double
+        longitude: Double,
+        triggerType: EmergencyTriggerType
     ): SmsResult = withContext(Dispatchers.IO) {
         
         if (!hasSmsPermission()) {
@@ -38,8 +39,42 @@ class SmsServiceImpl @Inject constructor(
             return@withContext SmsResult.Error("No emergency contacts to send to")
         }
         
-        val message = formatEmergencyMessage(latitude, longitude)
+        val message = when (triggerType) {
+            EmergencyTriggerType.BUTTON -> formatEmergencyMessage(latitude, longitude)
+            EmergencyTriggerType.SHAKE -> formatShakeAlertMessage(latitude, longitude)
+            EmergencyTriggerType.LOW_BATTERY -> formatEmergencyMessage(latitude, longitude) // Uses separate method
+        }
         
+        return@withContext sendSmsToContacts(contacts, message)
+    }
+    
+    override suspend fun sendLowBatteryAlert(
+        contacts: List<EmergencyContact>,
+        latitude: Double,
+        longitude: Double,
+        batteryPercent: Int
+    ): SmsResult = withContext(Dispatchers.IO) {
+        
+        if (!hasSmsPermission()) {
+            return@withContext SmsResult.Error("SMS permission not granted")
+        }
+        
+        if (contacts.isEmpty()) {
+            return@withContext SmsResult.Error("No emergency contacts to send to")
+        }
+        
+        val message = formatLowBatteryMessage(latitude, longitude, batteryPercent)
+        
+        return@withContext sendSmsToContacts(contacts, message)
+    }
+    
+    /**
+     * Send SMS to all contacts with the given message.
+     */
+    private fun sendSmsToContacts(
+        contacts: List<EmergencyContact>,
+        message: String
+    ): SmsResult {
         var sentCount = 0
         var failedCount = 0
         
@@ -77,7 +112,7 @@ class SmsServiceImpl @Inject constructor(
             }
         }
         
-        if (sentCount == 0) {
+        return if (sentCount == 0) {
             SmsResult.Error("Failed to send SMS to any contact")
         } else {
             SmsResult.Success(sentCount, failedCount)
@@ -95,6 +130,56 @@ class SmsServiceImpl @Inject constructor(
         
         return """
             🆘 EMERGENCY! I need help.
+            
+            📍 Location:
+            Lat: $lat
+            Lon: $lon
+            
+            🗺️ Map Link:
+            https://maps.google.com/?q=$lat,$lon
+            
+            Sent from SahanaLanka App
+        """.trimIndent()
+    }
+    
+    /**
+     * Format the emergency SMS message for shake detection.
+     */
+    private fun formatShakeAlertMessage(latitude: Double, longitude: Double): String {
+        val lat = LocationFormatter.formatLatitude(latitude)
+        val lon = LocationFormatter.formatLongitude(longitude)
+        
+        return """
+            🆘 EMERGENCY! I need help.
+            ⚠️ SHAKE ALERT - Auto-triggered
+            
+            📍 Location:
+            Lat: $lat
+            Lon: $lon
+            
+            🗺️ Map Link:
+            https://maps.google.com/?q=$lat,$lon
+            
+            Sent from SahanaLanka App
+        """.trimIndent()
+    }
+    
+    /**
+     * Format the low battery emergency SMS message.
+     */
+    private fun formatLowBatteryMessage(
+        latitude: Double,
+        longitude: Double,
+        batteryPercent: Int
+    ): String {
+        val lat = LocationFormatter.formatLatitude(latitude)
+        val lon = LocationFormatter.formatLongitude(longitude)
+        
+        return """
+            ⚠️ LOW BATTERY ALERT
+            
+            My phone battery is at $batteryPercent% and may die soon.
+            Last known location:
             
             📍 Location:
             Lat: $lat

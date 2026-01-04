@@ -14,12 +14,31 @@ interface SmsService {
      * @param contacts List of emergency contacts to send SMS to
      * @param latitude GPS latitude coordinate
      * @param longitude GPS longitude coordinate
+     * @param triggerType Type of trigger that initiated the alert
      * @return SmsResult with success/failure counts
      */
     suspend fun sendEmergencyAlert(
         contacts: List<EmergencyContact>,
         latitude: Double,
-        longitude: Double
+        longitude: Double,
+        triggerType: EmergencyTriggerType = EmergencyTriggerType.BUTTON
+    ): SmsResult
+    
+    /**
+     * Send low battery alert SMS to multiple contacts.
+     * Includes last known location and battery percentage.
+     * 
+     * @param contacts List of emergency contacts to send SMS to
+     * @param latitude GPS latitude coordinate
+     * @param longitude GPS longitude coordinate
+     * @param batteryPercent Current battery percentage
+     * @return SmsResult with success/failure counts
+     */
+    suspend fun sendLowBatteryAlert(
+        contacts: List<EmergencyContact>,
+        latitude: Double,
+        longitude: Double,
+        batteryPercent: Int
     ): SmsResult
 }
 

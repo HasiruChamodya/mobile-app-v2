@@ -1,6 +1,7 @@
 package com.shanalanka.emergency.core.di
 
 import android.content.Context
+import android.content.SharedPreferences
 import com.shanalanka.emergency.domain.service.*
 import dagger.Module
 import dagger.Provides
@@ -38,5 +39,23 @@ object ServiceModule {
         @ApplicationContext context: Context
     ): PermissionManager {
         return PermissionManager(context)
+    }
+    
+    @Provides
+    @Singleton
+    fun provideSharedPreferences(
+        @ApplicationContext context: Context
+    ): SharedPreferences {
+        return context.getSharedPreferences("emergency_prefs", Context.MODE_PRIVATE)
+    }
+    
+    @Provides
+    @Singleton
+    fun provideEmergencyTriggerManager(
+        locationService: LocationService,
+        smsService: SmsService,
+        contactRepository: com.shanalanka.emergency.data.repository.ContactRepository
+    ): EmergencyTriggerManager {
+        return EmergencyTriggerManager(locationService, smsService, contactRepository)
     }
 }
