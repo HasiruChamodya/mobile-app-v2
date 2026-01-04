@@ -151,7 +151,7 @@ private fun EmergencyScreenContent(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "🤳 Shake Detection Active",
+                                    text = "Shake Detection Active",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
@@ -172,7 +172,7 @@ private fun EmergencyScreenContent(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "🔋 Battery Monitor ($batteryThreshold%)",
+                                    text = "Battery Monitor ($batteryThreshold%)",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onTertiaryContainer
                                 )
