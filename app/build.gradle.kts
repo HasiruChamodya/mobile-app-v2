@@ -88,4 +88,7 @@ dependencies {
     // Icons
     implementation("androidx.compose.material:material-icons-extended:1.6.8")
 
+    // Location Services (Google Play Services)
+    implementation("com.google.android.gms:play-services-location:21.1.0")
+
 }

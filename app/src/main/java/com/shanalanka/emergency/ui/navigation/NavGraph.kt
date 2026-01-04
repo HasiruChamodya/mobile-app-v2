@@ -34,13 +34,7 @@ fun NavGraph(
         modifier = modifier
     ) {
         composable(Screen.Emergency.route) {
-            // TODO: Connect to ViewModel
             EmergencyScreen(
-                contactsCount = 0,
-                gpsEnabled = true,
-                onEmergencyTriggered = {
-                    // TODO: Implement emergency alert logic
-                },
                 onNavigateToContacts = {
                     navController.navigate(Screen.Contacts.route)
                 },
