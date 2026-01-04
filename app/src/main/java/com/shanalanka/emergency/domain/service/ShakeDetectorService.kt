@@ -97,9 +97,12 @@ class ShakeDetectorService : Service(), SensorEventListener {
         // Try to start as foreground service (may fail on some Android versions)
         try {
             startForeground(NOTIFICATION_ID, createNotification())
+        } catch (e: SecurityException) {
+            // If foreground service fails due to missing permissions, log but continue
+            android.util.Log.w(TAG, "Could not start as foreground service due to SecurityException", e)
         } catch (e: Exception) {
-            // If foreground service fails, log but continue as background service
-            android.util.Log.w(TAG, "Could not start as foreground service, running in background", e)
+            // Catch other potential exceptions (e.g., ForegroundServiceStartNotAllowedException on Android 12+)
+            android.util.Log.w(TAG, "Could not start as foreground service", e)
         }
         
         // Register sensor listener
