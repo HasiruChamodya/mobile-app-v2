@@ -51,7 +51,8 @@ class SettingsViewModel @Inject constructor(
     
     /**
      * Send a test emergency alert
-     * Same as real alert but with "TEST ALERT" prefix
+     * Note: Uses the same message format as real alerts.
+     * Recipients will receive actual emergency message with location.
      */
     fun sendTestAlert() {
         viewModelScope.launch {
@@ -72,7 +73,7 @@ class SettingsViewModel @Inject constructor(
                     return@launch
                 }
                 
-                // Send test SMS (add TEST prefix to identify)
+                // Send test SMS
                 val smsResult = sendTestSms(
                     contacts = contacts,
                     latitude = locationResult.latitude,
@@ -81,7 +82,14 @@ class SettingsViewModel @Inject constructor(
                 
                 when (smsResult) {
                     is SmsResult.Success -> {
-                        _testAlertState.value = TestAlertState.Success(smsResult.sentCount)
+                        // Check if any messages failed
+                        if (smsResult.failedCount > 0) {
+                            _testAlertState.value = TestAlertState.Error(
+                                "Sent to ${smsResult.sentCount} contact(s), but ${smsResult.failedCount} failed"
+                            )
+                        } else {
+                            _testAlertState.value = TestAlertState.Success(smsResult.sentCount)
+                        }
                     }
                     is SmsResult.Error -> {
                         _testAlertState.value = TestAlertState.Error(smsResult.message)
@@ -94,15 +102,16 @@ class SettingsViewModel @Inject constructor(
     }
     
     /**
-     * Send test SMS with TEST prefix
+     * Send test SMS
+     * Note: Currently uses the same SMS service as emergency alerts.
+     * Recipients will receive the actual emergency message format.
+     * Future enhancement: Add "TEST ALERT" prefix to message content.
      */
     private suspend fun sendTestSms(
         contacts: List<EmergencyContact>,
         latitude: Double,
         longitude: Double
     ): SmsResult {
-        // Note: SmsService will need to be enhanced to support test mode
-        // For now, use regular SMS service
         return smsService.sendEmergencyAlert(contacts, latitude, longitude)
     }
     
