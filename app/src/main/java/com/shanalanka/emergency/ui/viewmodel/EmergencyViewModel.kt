@@ -24,7 +24,8 @@ class EmergencyViewModel @Inject constructor(
     private val locationService: LocationService,
     private val smsService: SmsService,
     private val contactRepository: ContactRepository,
-    private val permissionManager: PermissionManager
+    private val permissionManager: PermissionManager,
+    settingsRepository: com.shanalanka.emergency.data.repository.SettingsRepository
 ) : ViewModel() {
     
     // UI State
@@ -42,6 +43,15 @@ class EmergencyViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = 0
         )
+    
+    // Settings from repository
+    val settings: StateFlow<com.shanalanka.emergency.data.models.EmergencySettings> = 
+        settingsRepository.settings
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = com.shanalanka.emergency.data.models.EmergencySettings()
+            )
     
     init {
         checkGpsStatus()
