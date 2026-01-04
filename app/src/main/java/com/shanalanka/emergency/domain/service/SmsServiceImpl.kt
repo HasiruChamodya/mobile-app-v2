@@ -4,8 +4,10 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.telephony.SmsManager
+import android.util.Log
 import androidx.core.content.ContextCompat
 import com.shanalanka.emergency.data.models.EmergencyContact
+import com.shanalanka.emergency.util.LocationFormatter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -17,6 +19,10 @@ import javax.inject.Inject
 class SmsServiceImpl @Inject constructor(
     private val context: Context
 ) : SmsService {
+    
+    companion object {
+        private const val TAG = "SmsServiceImpl"
+    }
     
     override suspend fun sendEmergencyAlert(
         contacts: List<EmergencyContact>,
@@ -67,7 +73,7 @@ class SmsServiceImpl @Inject constructor(
             } catch (e: Exception) {
                 failedCount++
                 // Log error but continue sending to other contacts
-                e.printStackTrace()
+                Log.e(TAG, "Failed to send SMS to ${contact.name} (${contact.phoneNumber})", e)
             }
         }
         
@@ -84,8 +90,8 @@ class SmsServiceImpl @Inject constructor(
      */
     private fun formatEmergencyMessage(latitude: Double, longitude: Double): String {
         // Format coordinates to 6 decimal places (~0.1 meter accuracy)
-        val lat = String.format("%.6f", latitude)
-        val lon = String.format("%.6f", longitude)
+        val lat = LocationFormatter.formatLatitude(latitude)
+        val lon = LocationFormatter.formatLongitude(longitude)
         
         return """
             🆘 EMERGENCY! I need help.

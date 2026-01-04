@@ -20,6 +20,10 @@ class LocationServiceImpl @Inject constructor(
     private val context: Context
 ) : LocationService {
     
+    companion object {
+        private const val LOCATION_TIMEOUT_MS = 10_000L // 10 seconds
+    }
+    
     private val fusedLocationClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
     
@@ -36,8 +40,8 @@ class LocationServiceImpl @Inject constructor(
         }
         
         return try {
-            // Try to get location with 10 second timeout
-            val location = withTimeoutOrNull(10_000L) {
+            // Try to get location with configured timeout
+            val location = withTimeoutOrNull(LOCATION_TIMEOUT_MS) {
                 suspendCancellableCoroutine { continuation ->
                     val locationRequest = LocationRequest.Builder(
                         Priority.PRIORITY_HIGH_ACCURACY,

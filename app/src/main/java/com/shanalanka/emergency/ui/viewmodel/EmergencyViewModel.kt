@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -69,6 +70,11 @@ class EmergencyViewModel @Inject constructor(
      * This is called when user confirms the emergency alert.
      */
     fun triggerEmergencyAlert() {
+        // Prevent triggering if already in progress
+        if (_emergencyState.value !is EmergencyState.Idle) {
+            return
+        }
+        
         viewModelScope.launch {
             sendEmergencyAlert()
         }
@@ -101,12 +107,7 @@ class EmergencyViewModel @Inject constructor(
             val location = locationResult as LocationResult.Success
             
             // 4. Get emergency contacts from database
-            val contacts = contactRepository.getAllContacts()
-            var contactList = emptyList<com.shanalanka.emergency.data.models.EmergencyContact>()
-            
-            contacts.collect { list ->
-                contactList = list
-            }
+            val contactList = contactRepository.getAllContacts().first()
             
             if (contactList.isEmpty()) {
                 _emergencyState.value = EmergencyState.Error(

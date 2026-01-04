@@ -16,11 +16,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.shanalanka.emergency.ui.components.EmergencyButton
 import com.shanalanka.emergency.ui.theme.SahanaLankaTheme
 import com.shanalanka.emergency.ui.viewmodel.EmergencyState
 import com.shanalanka.emergency.ui.viewmodel.EmergencyViewModel
+import com.shanalanka.emergency.util.LocationFormatter
 import kotlinx.coroutines.delay
 
 /**
@@ -39,11 +43,15 @@ fun EmergencyScreen(
     val gpsEnabled by viewModel.gpsEnabled.collectAsStateWithLifecycle()
     val contactsCount by viewModel.contactsCount.collectAsStateWithLifecycle()
     
-    // Check GPS status periodically
-    LaunchedEffect(Unit) {
-        while (true) {
-            viewModel.checkGpsStatus()
-            delay(5000) // Check every 5 seconds
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    
+    // Check GPS status periodically when screen is active
+    LaunchedEffect(lifecycleOwner.lifecycle) {
+        lifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+            while (true) {
+                viewModel.checkGpsStatus()
+                delay(5000) // Check every 5 seconds
+            }
         }
     }
     
@@ -257,7 +265,7 @@ private fun EmergencyScreenContent(
             text = {
                 Text(
                     "Your location has been sent to ${state.sentCount} emergency contact(s).\n\n" +
-                    "Location: ${String.format("%.6f", state.latitude)}, ${String.format("%.6f", state.longitude)}"
+                    "Location: ${LocationFormatter.formatCoordinates(state.latitude, state.longitude)}"
                 )
             },
             confirmButton = {
@@ -287,7 +295,7 @@ private fun EmergencyScreenContent(
                 Text(
                     "Alert sent to ${state.sentCount} of ${state.sentCount + state.failedCount} contacts.\n\n" +
                     "${state.failedCount} message(s) failed to send.\n\n" +
-                    "Location: ${String.format("%.6f", state.latitude)}, ${String.format("%.6f", state.longitude)}"
+                    "Location: ${LocationFormatter.formatCoordinates(state.latitude, state.longitude)}"
                 )
             },
             confirmButton = {
