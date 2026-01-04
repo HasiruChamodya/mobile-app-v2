@@ -28,6 +28,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.shanalanka.emergency.ui.components.EmergencyButton
 import com.shanalanka.emergency.ui.theme.SahanaLankaTheme
+import com.shanalanka.emergency.ui.theme.TopBarGradient
 import com.shanalanka.emergency.ui.viewmodel.EmergencyState
 import com.shanalanka.emergency.ui.viewmodel.EmergencyViewModel
 import com.shanalanka.emergency.util.LocationFormatter
@@ -103,14 +104,7 @@ private fun EmergencyScreenContent(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    Color(0xFFE53935), // Bright red
-                                    Color(0xFFB71C1C)  // Dark red
-                                )
-                            )
-                        )
+                        .background(brush = TopBarGradient)
                         .padding(horizontal = 16.dp, vertical = 16.dp)
                 ) {
                     Column {

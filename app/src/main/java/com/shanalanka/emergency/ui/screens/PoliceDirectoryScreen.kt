@@ -31,6 +31,7 @@ import com.shanalanka.emergency.data.model.PoliceStation
 import com.shanalanka.emergency.ui.components.DistrictFilterChip
 import com.shanalanka.emergency.ui.components.PoliceStationCard
 import com.shanalanka.emergency.ui.theme.SahanaLankaTheme
+import com.shanalanka.emergency.ui.theme.TopBarGradient
 import com.shanalanka.emergency.ui.viewmodel.PoliceDirectoryViewModel
 
 /**
@@ -60,14 +61,7 @@ fun PoliceDirectoryScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(
-                                brush = Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color(0xFFE53935), // Bright red
-                                        Color(0xFFB71C1C)  // Dark red
-                                    )
-                                )
-                            )
+                            .background(brush = TopBarGradient)
                             .padding(horizontal = 8.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -97,14 +91,7 @@ fun PoliceDirectoryScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(
-                                brush = Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color(0xFFE53935), // Bright red
-                                        Color(0xFFB71C1C)  // Dark red
-                                    )
-                                )
-                            )
+                            .background(brush = TopBarGradient)
                             .padding(horizontal = 16.dp, vertical = 16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween

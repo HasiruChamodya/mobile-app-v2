@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import com.shanalanka.emergency.data.models.EmergencyContact
 import com.shanalanka.emergency.ui.components.ContactCard
 import com.shanalanka.emergency.ui.theme.SahanaLankaTheme
+import com.shanalanka.emergency.ui.theme.TopBarGradient
 
 /**
  * Screen for managing emergency contacts.
@@ -53,14 +54,7 @@ fun ContactsScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    Color(0xFFE53935), // Bright red
-                                    Color(0xFFB71C1C)  // Dark red
-                                )
-                            )
-                        )
+                        .background(brush = TopBarGradient)
                         .padding(horizontal = 16.dp, vertical = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {

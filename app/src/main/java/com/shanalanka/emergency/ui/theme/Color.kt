@@ -1,11 +1,24 @@
 package com.shanalanka.emergency.ui.theme
 
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
 // Emergency red colors
 val EmergencyRed = Color(0xFFD32F2F)
 val EmergencyRedDark = Color(0xFFB71C1C)
 val EmergencyRedLight = Color(0xFFEF5350)
+
+// Top bar gradient colors
+val TopBarGradientStart = Color(0xFFE53935) // Material Red 600 - bright
+val TopBarGradientEnd = Color(0xFFB71C1C)   // Material Red 900 - dark
+
+// Top bar gradient brush
+val TopBarGradient = Brush.verticalGradient(
+    colors = listOf(
+        TopBarGradientStart,
+        TopBarGradientEnd
+    )
+)
 
 // Warning amber/yellow colors
 val WarningAmber = Color(0xFFFFA000)
