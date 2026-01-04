@@ -42,6 +42,7 @@ fun EmergencyScreen(
     val emergencyState by viewModel.emergencyState.collectAsStateWithLifecycle()
     val gpsEnabled by viewModel.gpsEnabled.collectAsStateWithLifecycle()
     val contactsCount by viewModel.contactsCount.collectAsStateWithLifecycle()
+    val settings by viewModel.settings.collectAsStateWithLifecycle()
     
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     
@@ -59,6 +60,9 @@ fun EmergencyScreen(
         contactsCount = contactsCount,
         gpsEnabled = gpsEnabled,
         emergencyState = emergencyState,
+        shakeDetectionEnabled = settings.shakeDetectionEnabled,
+        lowBatteryAlertEnabled = settings.lowBatteryAlertEnabled,
+        batteryThreshold = settings.batteryThreshold,
         onEmergencyTriggered = { viewModel.triggerEmergencyAlert() },
         onNavigateToContacts = onNavigateToContacts,
         onNavigateToSettings = onNavigateToSettings,
@@ -76,6 +80,9 @@ private fun EmergencyScreenContent(
     contactsCount: Int,
     gpsEnabled: Boolean,
     emergencyState: EmergencyState,
+    shakeDetectionEnabled: Boolean,
+    lowBatteryAlertEnabled: Boolean,
+    batteryThreshold: Int,
     onEmergencyTriggered: () -> Unit,
     onNavigateToContacts: () -> Unit,
     onNavigateToSettings: () -> Unit,
@@ -141,6 +148,48 @@ private fun EmergencyScreenContent(
                         text = "$contactsCount Emergency Contact${if (contactsCount != 1) "s" else ""}",
                         isActive = contactsCount > 0
                     )
+                    
+                    // Shake Detection indicator
+                    if (shakeDetectionEnabled) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "🤳 Shake Detection Active",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+                        }
+                    }
+                    
+                    // Battery Monitor indicator
+                    if (lowBatteryAlertEnabled) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "🔋 Battery Monitor ($batteryThreshold%)",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                                )
+                            }
+                        }
+                    }
                 }
                 
                 // Center: Emergency button with instructions
@@ -431,6 +480,9 @@ fun EmergencyScreenPreview() {
             contactsCount = 3,
             gpsEnabled = true,
             emergencyState = EmergencyState.Idle,
+            shakeDetectionEnabled = true,
+            lowBatteryAlertEnabled = true,
+            batteryThreshold = 15,
             onEmergencyTriggered = { },
             onNavigateToContacts = { },
             onNavigateToSettings = { },
@@ -447,6 +499,9 @@ fun EmergencyScreenNoContactsPreview() {
             contactsCount = 0,
             gpsEnabled = true,
             emergencyState = EmergencyState.Idle,
+            shakeDetectionEnabled = false,
+            lowBatteryAlertEnabled = false,
+            batteryThreshold = 15,
             onEmergencyTriggered = { },
             onNavigateToContacts = { },
             onNavigateToSettings = { },
@@ -463,6 +518,9 @@ fun EmergencyScreenDarkPreview() {
             contactsCount = 2,
             gpsEnabled = false,
             emergencyState = EmergencyState.Idle,
+            shakeDetectionEnabled = true,
+            lowBatteryAlertEnabled = true,
+            batteryThreshold = 20,
             onEmergencyTriggered = { },
             onNavigateToContacts = { },
             onNavigateToSettings = { },

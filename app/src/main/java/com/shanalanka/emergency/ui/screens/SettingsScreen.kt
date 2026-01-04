@@ -21,6 +21,7 @@ import com.shanalanka.emergency.ui.theme.SahanaLankaTheme
  * @param onSettingsChanged Callback when settings are changed
  * @param onTestAlert Callback when test alert button is clicked
  * @param onNavigateBack Callback to navigate back
+ * @param onShakeDetectionToggled Callback when shake detection is toggled
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,6 +31,7 @@ fun SettingsScreen(
     onTestAlert: () -> Unit,
     onNavigateBack: () -> Unit,
     isTestAlertLoading: Boolean = false,
+    onShakeDetectionToggled: ((Boolean) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -129,6 +131,99 @@ fun SettingsScreen(
                     onSettingsChanged(settings.copy(vibrationEnabled = checked))
                 }
             )
+            
+            Divider()
+            
+            // Emergency Triggers Section
+            Text(
+                text = "Emergency Triggers",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            
+            // Shake Detection
+            SettingSwitch(
+                title = "Shake Detection",
+                description = "Trigger alert by shaking phone 3 times",
+                checked = settings.shakeDetectionEnabled,
+                onCheckedChange = { checked ->
+                    onSettingsChanged(settings.copy(shakeDetectionEnabled = checked))
+                    onShakeDetectionToggled?.invoke(checked)
+                }
+            )
+            
+            if (settings.shakeDetectionEnabled) {
+                // Shake Sensitivity Dropdown
+                var expanded by remember { mutableStateOf(false) }
+                
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded },
+                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp)
+                ) {
+                    OutlinedTextField(
+                        value = settings.shakeSensitivity.name.lowercase().replaceFirstChar { it.uppercase() },
+                        onValueChange = { },
+                        readOnly = true,
+                        label = { Text("Shake Sensitivity") },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                        },
+                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        com.shanalanka.emergency.data.models.ShakeSensitivity.values().forEach { sensitivity ->
+                            DropdownMenuItem(
+                                text = { Text(sensitivity.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                                onClick = {
+                                    onSettingsChanged(settings.copy(shakeSensitivity = sensitivity))
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // Low Battery Alert
+            SettingSwitch(
+                title = "Low Battery Alert",
+                description = "Send location when battery is low",
+                checked = settings.lowBatteryAlertEnabled,
+                onCheckedChange = { checked ->
+                    onSettingsChanged(settings.copy(lowBatteryAlertEnabled = checked))
+                }
+            )
+            
+            if (settings.lowBatteryAlertEnabled) {
+                // Battery Threshold Slider
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 8.dp)
+                ) {
+                    Text(
+                        text = "Battery Threshold: ${settings.batteryThreshold}%",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Slider(
+                        value = settings.batteryThreshold.toFloat(),
+                        onValueChange = { value ->
+                            onSettingsChanged(settings.copy(batteryThreshold = value.toInt()))
+                        },
+                        valueRange = 10f..25f,
+                        steps = 3, // Steps between values: 10, 15, 20, 25 = 3 intervals
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
             
             Divider()
             

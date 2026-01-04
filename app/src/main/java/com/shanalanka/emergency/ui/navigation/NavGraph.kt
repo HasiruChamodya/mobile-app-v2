@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -108,6 +109,7 @@ fun NavGraph(
             val viewModel: SettingsViewModel = hiltViewModel()
             val settings by viewModel.settings.collectAsStateWithLifecycle()
             val testAlertState by viewModel.testAlertState.collectAsStateWithLifecycle()
+            val context = LocalContext.current
             
             // Show test alert result dialog
             when (val state = testAlertState) {
@@ -149,7 +151,14 @@ fun NavGraph(
                 onNavigateBack = {
                     navController.popBackStack()
                 },
-                isTestAlertLoading = testAlertState is TestAlertState.Sending
+                isTestAlertLoading = testAlertState is TestAlertState.Sending,
+                onShakeDetectionToggled = { enabled ->
+                    if (enabled) {
+                        com.shanalanka.emergency.domain.service.ShakeDetectorService.start(context)
+                    } else {
+                        com.shanalanka.emergency.domain.service.ShakeDetectorService.stop(context)
+                    }
+                }
             )
         }
     }

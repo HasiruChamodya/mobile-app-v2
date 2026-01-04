@@ -1,8 +1,10 @@
 package com.shanalanka.emergency
 
 import android.app.Application
+import com.shanalanka.emergency.data.PreferenceKeys
 import com.shanalanka.emergency.data.local.ContactEntity
 import com.shanalanka.emergency.data.repository.DataRepository
+import com.shanalanka.emergency.domain.service.ShakeDetectorService
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +28,13 @@ class SahanaApp : Application() {
             repository.saveContactLocally(
                 ContactEntity(name = "Suwaseriya Ambulance", phoneNumber = "1990", category = "Medical", district = "National")
             )
+        }
+        
+        // Start shake detection service if it was enabled
+        val prefs = getSharedPreferences(PreferenceKeys.PREFS_NAME, MODE_PRIVATE)
+        val shakeEnabled = prefs.getBoolean(PreferenceKeys.KEY_SHAKE_DETECTION_ENABLED, false)
+        if (shakeEnabled) {
+            ShakeDetectorService.start(this)
         }
     }
 }
