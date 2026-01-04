@@ -42,9 +42,6 @@ class ShakeDetectorService : Service(), SensorEventListener {
     // Shake detection state
     private var shakeTimestamps = mutableListOf<Long>()
     private var lastUpdateTime = 0L
-    private var lastX = 0f
-    private var lastY = 0f
-    private var lastZ = 0f
     
     // Thresholds based on sensitivity
     private var accelerationThreshold = 15f // m/s^2
@@ -143,28 +140,33 @@ class ShakeDetectorService : Service(), SensorEventListener {
         val z = event.values[2]
         
         // Calculate acceleration magnitude (remove gravity)
+        // Note: This is a simplified approach. For production, consider using a low-pass filter
         val accelerationMagnitude = sqrt(x * x + y * y + z * z) - GRAVITY
         
         // Detect significant acceleration (shake movement)
         if (accelerationMagnitude > accelerationThreshold) {
-            shakeTimestamps.add(currentTime)
-            
-            // Provide subtle haptic feedback for each detected shake movement
-            if (vibrator.hasVibrator()) {
-                vibrator.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE))
-            }
-            
-            // Clean up old timestamps outside the detection window
-            shakeTimestamps.removeAll { it < currentTime - shakeWindowMs }
-            
-            // Check if we have enough shake events in the time window
-            if (shakeTimestamps.size >= requiredShakeEvents) {
-                onShakeDetected()
-                shakeTimestamps.clear()
+            synchronized(shakeTimestamps) {
+                shakeTimestamps.add(currentTime)
+                
+                // Provide subtle haptic feedback for each detected shake movement
+                if (vibrator.hasVibrator()) {
+                    vibrator.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE))
+                }
+                
+                // Clean up old timestamps outside the detection window
+                shakeTimestamps.removeAll { it < currentTime - shakeWindowMs }
+                
+                // Check if we have enough shake events in the time window
+                if (shakeTimestamps.size >= requiredShakeEvents) {
+                    onShakeDetected()
+                    shakeTimestamps.clear()
+                }
             }
         } else {
             // Clean up old timestamps
-            shakeTimestamps.removeAll { it < currentTime - shakeWindowMs }
+            synchronized(shakeTimestamps) {
+                shakeTimestamps.removeAll { it < currentTime - shakeWindowMs }
+            }
         }
     }
     
