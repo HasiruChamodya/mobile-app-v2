@@ -8,6 +8,7 @@ import com.shanalanka.emergency.data.local.AppDatabase
 import com.shanalanka.emergency.data.local.ContactDao
 import com.shanalanka.emergency.data.local.dao.EmergencyGuideDao
 import com.shanalanka.emergency.data.local.dao.PoliceStationDao
+import com.shanalanka.emergency.data.repository.ContactRepository
 import com.shanalanka.emergency.data.source.EmergencyGuidesData
 import com.shanalanka.emergency.data.source.PoliceStationData
 import dagger.Module
@@ -77,6 +78,12 @@ object DatabaseModule {
     @Provides
     fun provideEmergencyGuideDao(db: AppDatabase): EmergencyGuideDao {
         return db.emergencyGuideDao()
+    }
+    
+    @Provides
+    @Singleton
+    fun provideContactRepository(contactDao: ContactDao): ContactRepository {
+        return ContactRepository(contactDao)
     }
 }
 
