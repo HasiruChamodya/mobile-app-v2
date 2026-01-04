@@ -203,7 +203,7 @@ fun SahanaLankaApp() {
     val bottomNavItems = listOf(
         BottomNavItem(
             route = Screen.Emergency.route,
-            label = "Emergency",
+            label = "SOS",
             icon = Icons.Default.Warning
         ),
         BottomNavItem(

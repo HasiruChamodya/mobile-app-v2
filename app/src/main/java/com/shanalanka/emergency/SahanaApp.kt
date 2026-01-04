@@ -19,16 +19,8 @@ class SahanaApp : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        // Seeding happens once when the app starts
-        // Since we use OnConflictStrategy.REPLACE in the DAO, this won't create duplicates
-        CoroutineScope(Dispatchers.IO).launch {
-            repository.saveContactLocally(
-                ContactEntity(name = "Police Emergency", phoneNumber = "119", category = "Police", district = "National")
-            )
-            repository.saveContactLocally(
-                ContactEntity(name = "Suwaseriya Ambulance", phoneNumber = "1990", category = "Medical", district = "National")
-            )
-        }
+        // Default contacts removed - users will add their own contacts
+        // No longer pre-populating Police (119) and Ambulance (1990)
         
         // Start shake detection service if it was enabled
         val prefs = getSharedPreferences(PreferenceKeys.PREFS_NAME, MODE_PRIVATE)

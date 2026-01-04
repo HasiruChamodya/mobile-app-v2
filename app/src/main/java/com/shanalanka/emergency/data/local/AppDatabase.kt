@@ -17,7 +17,7 @@ import com.shanalanka.emergency.data.local.entity.PoliceStationEntity
         GuideStepEntity::class,
         GuideWarningEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
