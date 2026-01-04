@@ -2,10 +2,34 @@ package com.shanalanka.emergency.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// Emergency red colors
+val EmergencyRed = Color(0xFFD32F2F)
+val EmergencyRedDark = Color(0xFFB71C1C)
+val EmergencyRedLight = Color(0xFFEF5350)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// Warning amber/yellow colors
+val WarningAmber = Color(0xFFFFA000)
+val WarningAmberDark = Color(0xFFFF8F00)
+val WarningAmberLight = Color(0xFFFFB300)
+
+// Success/Safe green colors
+val SafeGreen = Color(0xFF388E3C)
+val SafeGreenDark = Color(0xFF2E7D32)
+val SafeGreenLight = Color(0xFF66BB6A)
+
+// Neutral grays
+val Gray50 = Color(0xFFFAFAFA)
+val Gray100 = Color(0xFFF5F5F5)
+val Gray200 = Color(0xFFEEEEEE)
+val Gray300 = Color(0xFFE0E0E0)
+val Gray400 = Color(0xFFBDBDBD)
+val Gray500 = Color(0xFF9E9E9E)
+val Gray600 = Color(0xFF757575)
+val Gray700 = Color(0xFF616161)
+val Gray800 = Color(0xFF424242)
+val Gray900 = Color(0xFF212121)
+
+// Dark theme colors
+val EmergencyRedDarkTheme = Color(0xFFEF5350)
+val WarningAmberDarkTheme = Color(0xFFFFB300)
+val SafeGreenDarkTheme = Color(0xFF66BB6A)
