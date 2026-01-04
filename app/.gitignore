@@ -1,0 +1,4 @@
+/build
+.gradele/
+.idea/
+local.properties
