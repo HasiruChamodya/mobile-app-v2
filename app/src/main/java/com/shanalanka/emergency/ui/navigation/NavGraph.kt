@@ -1,5 +1,8 @@
 package com.shanalanka.emergency.ui.navigation
 
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -18,6 +21,8 @@ import com.shanalanka.emergency.ui.screens.GuideDetailScreen
 import com.shanalanka.emergency.ui.screens.PoliceDirectoryScreen
 import com.shanalanka.emergency.ui.screens.SettingsScreen
 import com.shanalanka.emergency.ui.viewmodel.ContactsViewModel
+import com.shanalanka.emergency.ui.viewmodel.SettingsViewModel
+import com.shanalanka.emergency.ui.viewmodel.TestAlertState
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
@@ -100,18 +105,51 @@ fun NavGraph(
         }
         
         composable(Screen.Settings.route) {
-            // TODO: Connect to ViewModel
+            val viewModel: SettingsViewModel = hiltViewModel()
+            val settings by viewModel.settings.collectAsStateWithLifecycle()
+            val testAlertState by viewModel.testAlertState.collectAsStateWithLifecycle()
+            
+            // Show test alert result dialog
+            when (val state = testAlertState) {
+                is TestAlertState.Success -> {
+                    AlertDialog(
+                        onDismissRequest = { viewModel.resetTestAlertState() },
+                        title = { Text("Test Alert Sent") },
+                        text = { Text("Test alert sent to ${state.sentCount} contact(s)") },
+                        confirmButton = {
+                            Button(onClick = { viewModel.resetTestAlertState() }) {
+                                Text("OK")
+                            }
+                        }
+                    )
+                }
+                is TestAlertState.Error -> {
+                    AlertDialog(
+                        onDismissRequest = { viewModel.resetTestAlertState() },
+                        title = { Text("Test Alert Failed") },
+                        text = { Text(state.message) },
+                        confirmButton = {
+                            Button(onClick = { viewModel.resetTestAlertState() }) {
+                                Text("OK")
+                            }
+                        }
+                    )
+                }
+                else -> {}
+            }
+            
             SettingsScreen(
-                settings = EmergencySettings(),
+                settings = settings,
                 onSettingsChanged = { newSettings ->
-                    // TODO: Implement settings save logic
+                    viewModel.updateSettings(newSettings)
                 },
                 onTestAlert = {
-                    // TODO: Implement test alert logic
+                    viewModel.sendTestAlert()
                 },
                 onNavigateBack = {
                     navController.popBackStack()
-                }
+                },
+                isTestAlertLoading = testAlertState is TestAlertState.Sending
             )
         }
     }
