@@ -14,6 +14,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.core.app.NotificationCompat
 import com.shanalanka.emergency.R
+import com.shanalanka.emergency.data.PreferenceKeys
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -44,11 +45,14 @@ class ShakeDetectorService : Service(), SensorEventListener {
     private var lastX = 0f
     private var lastY = 0f
     private var lastZ = 0f
+    private var shakeThreshold = 2.7f // Dynamic threshold based on sensitivity
     
     companion object {
         private const val NOTIFICATION_ID = 1001
         private const val CHANNEL_ID = "shake_detection_channel"
-        private const val SHAKE_THRESHOLD_GRAVITY = 2.7f // Sensitivity threshold
+        private const val SHAKE_THRESHOLD_LOW = 3.5f // Less sensitive
+        private const val SHAKE_THRESHOLD_MEDIUM = 2.7f // Balanced
+        private const val SHAKE_THRESHOLD_HIGH = 2.0f // More sensitive
         private const val SHAKE_SLOP_TIME_MS = 500 // Time between shakes
         private const val SHAKE_COUNT_RESET_TIME_MS = 2000 // Reset after 2 seconds
         private const val REQUIRED_SHAKE_COUNT = 3
@@ -66,6 +70,15 @@ class ShakeDetectorService : Service(), SensorEventListener {
     
     override fun onCreate() {
         super.onCreate()
+        
+        // Load sensitivity setting
+        val prefs = getSharedPreferences(PreferenceKeys.PREFS_NAME, Context.MODE_PRIVATE)
+        val sensitivityName = prefs.getString(PreferenceKeys.KEY_SHAKE_SENSITIVITY, "MEDIUM") ?: "MEDIUM"
+        shakeThreshold = when (sensitivityName) {
+            "LOW" -> SHAKE_THRESHOLD_LOW
+            "HIGH" -> SHAKE_THRESHOLD_HIGH
+            else -> SHAKE_THRESHOLD_MEDIUM
+        }
         
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -109,7 +122,7 @@ class ShakeDetectorService : Service(), SensorEventListener {
             
             val gForce = sqrt(gX * gX + gY * gY + gZ * gZ)
             
-            if (gForce > SHAKE_THRESHOLD_GRAVITY) {
+            if (gForce > shakeThreshold) {
                 if (currentTime - lastShakeTime > SHAKE_SLOP_TIME_MS) {
                     shakeCount++
                     lastShakeTime = currentTime

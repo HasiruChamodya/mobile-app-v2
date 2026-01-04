@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.BatteryManager
+import com.shanalanka.emergency.data.PreferenceKeys
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,9 +25,6 @@ class BatteryMonitorReceiver : BroadcastReceiver() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     
     companion object {
-        private const val PREFS_ALERT_SENT = "battery_alert_sent"
-        private const val PREFS_LOW_BATTERY_ENABLED = "low_battery_enabled"
-        private const val PREFS_BATTERY_THRESHOLD = "battery_threshold"
         private const val DEFAULT_THRESHOLD = 15
     }
     
@@ -36,21 +34,25 @@ class BatteryMonitorReceiver : BroadcastReceiver() {
         
         if (intent.action != Intent.ACTION_BATTERY_CHANGED) return
         
-        // Check if feature is enabled - use same key as SettingsRepository
-        val settingsPrefs = context.getSharedPreferences("emergency_settings", Context.MODE_PRIVATE)
-        val isEnabled = settingsPrefs.getBoolean("low_battery_enabled", false)
+        // Check if feature is enabled
+        val settingsPrefs = context.getSharedPreferences(PreferenceKeys.PREFS_NAME, Context.MODE_PRIVATE)
+        val isEnabled = settingsPrefs.getBoolean(PreferenceKeys.KEY_LOW_BATTERY_ENABLED, false)
         if (!isEnabled) return
         
         // Get battery level
         val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
         val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+        
+        // Validate scale to prevent division by zero
+        if (scale <= 0 || level < 0) return
+        
         val batteryPct = (level / scale.toFloat() * 100).toInt()
         
-        // Get threshold - use same key as SettingsRepository
-        val threshold = settingsPrefs.getInt("battery_threshold", DEFAULT_THRESHOLD)
+        // Get threshold
+        val threshold = settingsPrefs.getInt(PreferenceKeys.KEY_BATTERY_THRESHOLD, DEFAULT_THRESHOLD)
         
         // Check if alert already sent
-        val alertSent = settingsPrefs.getBoolean(PREFS_ALERT_SENT, false)
+        val alertSent = settingsPrefs.getBoolean(PreferenceKeys.KEY_BATTERY_ALERT_SENT, false)
         
         when {
             batteryPct <= threshold && !alertSent -> {
@@ -69,13 +71,13 @@ class BatteryMonitorReceiver : BroadcastReceiver() {
     
     private fun markAlertAsSent(prefs: android.content.SharedPreferences) {
         prefs.edit()
-            .putBoolean(PREFS_ALERT_SENT, true)
+            .putBoolean(PreferenceKeys.KEY_BATTERY_ALERT_SENT, true)
             .apply()
     }
     
     private fun resetAlertFlag(prefs: android.content.SharedPreferences) {
         prefs.edit()
-            .putBoolean(PREFS_ALERT_SENT, false)
+            .putBoolean(PreferenceKeys.KEY_BATTERY_ALERT_SENT, false)
             .apply()
     }
 }

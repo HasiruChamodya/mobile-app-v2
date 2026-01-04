@@ -219,7 +219,7 @@ fun SettingsScreen(
                             onSettingsChanged(settings.copy(batteryThreshold = value.toInt()))
                         },
                         valueRange = 10f..25f,
-                        steps = 2, // 10, 15, 20, 25
+                        steps = 3, // Steps between values: 10, 15, 20, 25 = 3 intervals
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
