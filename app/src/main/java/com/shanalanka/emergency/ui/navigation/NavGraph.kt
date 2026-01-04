@@ -17,6 +17,9 @@ import com.shanalanka.emergency.ui.screens.EmergencyGuidesScreen
 import com.shanalanka.emergency.ui.screens.GuideDetailScreen
 import com.shanalanka.emergency.ui.screens.PoliceDirectoryScreen
 import com.shanalanka.emergency.ui.screens.SettingsScreen
+import com.shanalanka.emergency.ui.viewmodel.ContactsViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 /**
  * Navigation graph for the app.
@@ -77,16 +80,18 @@ fun NavGraph(
                 }
             )
         }
-        
+
         composable(Screen.Contacts.route) {
-            // TODO: Connect to ViewModel
+            val viewModel: ContactsViewModel = hiltViewModel()
+            val contacts by viewModel.contacts. collectAsStateWithLifecycle()
+
             ContactsScreen(
-                contacts = emptyList(),
-                onAddContact = {
-                    // TODO: Implement add contact logic
+                contacts = contacts,
+                onAddContact = { name, phone ->
+                    viewModel.addContact(name, phone)
                 },
                 onDeleteContact = { contact ->
-                    // TODO: Implement delete contact logic
+                    viewModel.deleteContact(contact)
                 },
                 onNavigateBack = {
                     navController.popBackStack()

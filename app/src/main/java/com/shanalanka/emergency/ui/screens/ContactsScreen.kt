@@ -31,7 +31,7 @@ import com.shanalanka.emergency.ui.theme.SahanaLankaTheme
 @Composable
 fun ContactsScreen(
     contacts: List<EmergencyContact>,
-    onAddContact: () -> Unit,
+    onAddContact: (String, String) -> Unit,  // ← CHANGED: now takes name and phone
     onDeleteContact: (EmergencyContact) -> Unit,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
@@ -132,7 +132,7 @@ fun ContactsScreen(
             onDismiss = { showAddDialog = false },
             onConfirm = { name, phone ->
                 showAddDialog = false
-                onAddContact()
+                onAddContact(name, phone)
             }
         )
     }
@@ -273,7 +273,7 @@ fun ContactsScreenPreview() {
                 EmergencyContact(2, "Jane Smith", "+94 71 987 6543"),
                 EmergencyContact(3, "Bob Johnson", "+94 76 555 1234")
             ),
-            onAddContact = { },
+            onAddContact = { _, _ -> },
             onDeleteContact = { },
             onNavigateBack = { }
         )
@@ -286,7 +286,7 @@ fun ContactsScreenEmptyPreview() {
     SahanaLankaTheme {
         ContactsScreen(
             contacts = emptyList(),
-            onAddContact = { },
+            onAddContact = { _, _ -> },
             onDeleteContact = { },
             onNavigateBack = { }
         )
@@ -301,7 +301,7 @@ fun ContactsScreenDarkPreview() {
             contacts = listOf(
                 EmergencyContact(1, "Emergency Service", "119")
             ),
-            onAddContact = { },
+            onAddContact = { _, _ -> },
             onDeleteContact = { },
             onNavigateBack = { }
         )
