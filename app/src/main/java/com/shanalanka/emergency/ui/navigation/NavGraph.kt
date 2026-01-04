@@ -5,12 +5,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.shanalanka.emergency.data.models.EmergencyContact
 import com.shanalanka.emergency.data.models.EmergencySettings
 import com.shanalanka.emergency.ui.screens.ContactsScreen
 import com.shanalanka.emergency.ui.screens.EmergencyScreen
+import com.shanalanka.emergency.ui.screens.EmergencyGuidesScreen
+import com.shanalanka.emergency.ui.screens.GuideDetailScreen
+import com.shanalanka.emergency.ui.screens.PoliceDirectoryScreen
 import com.shanalanka.emergency.ui.screens.SettingsScreen
 
 /**
@@ -41,6 +46,40 @@ fun NavGraph(
                 },
                 onNavigateToSettings = {
                     navController.navigate(Screen.Settings.route)
+                }
+            )
+        }
+        
+        composable(Screen.Police.route) {
+            PoliceDirectoryScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        
+        composable(Screen.Guides.route) {
+            EmergencyGuidesScreen(
+                onGuideClick = { guideId ->
+                    navController.navigate(Screen.GuideDetail.createRoute(guideId))
+                },
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        
+        composable(
+            route = Screen.GuideDetail.route,
+            arguments = listOf(
+                navArgument("guideId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val guideId = backStackEntry.arguments?.getString("guideId") ?: return@composable
+            GuideDetailScreen(
+                guideId = guideId,
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }
