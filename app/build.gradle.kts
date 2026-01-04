@@ -62,27 +62,30 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    
+    // Hilt
     implementation("com.google.dagger:hilt-android:2.50")
     kapt("com.google.dagger:hilt-android-compiler:2.50")
+    
+    // Navigation
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    
+    // ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
 
-        val roomVersion = "2.6.1"
+    // Room
+    val roomVersion = "2.6.1"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
 
-        implementation("androidx.room:room-runtime:$roomVersion")
-        implementation("androidx.room:room-ktx:$roomVersion")
-
-        kapt("androidx.room:room-compiler:$roomVersion")
-
-    // Import the Firebase BoM
+    // Firebase
     implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
-
-    // TODO: Add the dependencies for Firebase products you want to use
-    // When using the BoM, don't specify versions in Firebase dependencies
-
     implementation("com.google.firebase:firebase-analytics")
 
-
-    // Add the dependencies for any other desired Firebase products
-
-    // https://firebase.google.com/docs/android/setup#available-libraries
+    // Icons
+    implementation("androidx.compose.material:material-icons-extended:1.6.8")
 
 }
